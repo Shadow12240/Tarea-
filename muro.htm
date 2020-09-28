@@ -1,0 +1,143 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Tarea</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+        <style>
+            .login
+            {
+                width: 600px;
+                margin: 0 auto;
+                background-color: #ccc;
+                padding: 25px;
+                text-align: center;
+                border: 2px solid #000;
+                border-radius: 10px;
+                font-size: 20pt;
+                box-shadow: 10px 10px 10px #333;
+                height: 40%;
+                margin-top: 100px;
+                display: none;
+            }
+            input
+            {
+                font-size: 15pt;
+                padding: 10px;
+                border-radius: 10px;    
+            }
+            .perfil
+            {
+                width: 1200px;
+                margin: 0 auto;
+                background-color: #ccc;
+                padding: 25px;
+                text-align: center;
+                border: 2px solid #000;
+                border-radius: 10px;
+                font-size: 20pt;
+                box-shadow: 10px 10px 10px #333;
+                height: 90%;
+                display: none;
+            }
+            .publicaciones
+            {
+                width: 100%;
+                background-color: #fff;
+                border: 2px solid #000;
+                border-radius: 10px;
+                text-align: center;
+                height: 520px;
+            }
+            .publicarEscibir
+            {
+                margin-top: 10px;
+            }
+            input[id=textMensaje]
+            {
+                width: 92%;
+            }
+        </style>
+    </head>
+    <body>
+    
+        <div id="login" class="login">
+            <h3>ingrese su nombre</h3>
+            <input type="text" id="username"/>
+            <br><br/>
+            <input type="button" value="Ingrese a su perfil" id="botonIngreso"/>   
+        </div>
+
+        <div id="perfil" class="perfil">
+         <div id="publicaciones" class="publicaciones">
+            Bienvenido al Muro!<br/>
+         </div>
+         <div id="publicarEscribir" class="publicarEscribir">
+             <input type="text" class="textMensaje" id="textMensaje"/>
+             <input type="button" value="Publicar" class="botonPublicar" id="botonPublicar"/>
+         </div>
+
+        </div>
+    </body>
+
+    <script src="/socket.io/socket.io.js"> </script>
+    <script>
+     
+     var socket= io();
+        
+    $(document).ready(function()
+    {
+        $('#login').fadeIn(500);
+    });
+    
+    $('#botonIngreso').click(function()
+    {
+        var username= $('#username').val();
+
+        if (username=='') 
+        {
+            alert('Debes escribir un nombre');   
+        }
+        else
+        {
+            //enviamos el nombre de usuario a node y comenzamos a publicar
+
+            socket.emit('crearUsuario', username);
+
+            $('#login').fadeOut(500, function()
+            {
+                $('#perfil').fadeIn(500);
+            });
+        }
+    });
+    
+    $('#textMnesaje').keypress(function(event)
+    {
+        if (event.which==13)
+        {
+            $('#botonPublicar').click();
+        }
+    });
+
+    $('#botonPublicar').click(function()
+    {
+        var mensaje= $('#textMensaje').val();
+
+        if (mensaje!='')
+        {
+           $('#textMensaje').val('');
+           //enviamos el mensaje  
+           
+           socket.emit('mensajeNuevo',mensaje);
+        }
+    });
+
+    socket.on('mensaje',function(data)
+    {
+        var nuevoMensaje= '<b>' + data.usuario + 'Publico:</b>' + data.mensaje;
+
+        $('#publicaciones').append(nuevoMensaje + '<br  />');
+    });
+       
+    </script>
+</html>
